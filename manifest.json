@@ -1,10 +1,11 @@
 {
   "name": "Controle de Estoque",
   "short_name": "Estoque",
-  "start_url": "index.html",
+  "description": "Aplicativo para controle de estoque de porta paletes.",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#0d6efd",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "icon-192.png",
