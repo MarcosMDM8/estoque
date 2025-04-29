@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#0070f2" />
+  <title>Consulta e Edição de Estoque</title>
+  
+  <!-- Manifesto para PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  
+  <!-- Meta tags para melhorar a experiência em dispositivos móveis -->
+  <meta name="description" content="Consulta e edição de itens do estoque.">
+  <meta name="robots" content="noindex, nofollow">
+
+  <style>
+    /* Estilos gerais */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 10px;
+      overflow-x: hidden;
+    }
+
+    /* Estilos do contêiner */
+    .content-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 15px auto;
+      max-width: 100%;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      width: 100%;
+    }
+
+    /* Estilo do título */
+    h1 {
+      text-align: center;
+      color: #0070f2;
+    }
+
+    /* Estilo das entradas */
+    .entrada {
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+
+    .entrada:last-child {
+      border-bottom: none;
+    }
+
+    .entrada button {
+      margin-top: 6px;
+      font-size: 0.9rem;
+      padding: 6px 10px;
+    }
+
+    /* Responsividade para telas pequenas */
+    @media (max-width: 600px) {
+      .content-container {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Consulta e Edição de Estoque</h1>
+
+  <div class="content-container">
+    <div id="dados"></div>
+  </div>
+
+  <script>
+    const API_URL = 'https://api.sheetbest.com/sheets/84e6a4c0-a620-45c6-97a4-36695d0970ea';
+
+    function carregarDados() {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          const dadosDiv = document.getElementById('dados');
+          dadosDiv.innerHTML = '';
+          data.reverse().forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'entrada';
+            div.innerHTML = `
+              <strong>${item.produto}</strong> - ${item.tipo} - ${item.quantidade} unidades - ${item.endereco} - ${item.data} (ID: ${item.ID})
+              <br/>
+              <button onclick="editar('${item.ID}')">✏️ Editar</button>
+              <button onclick="excluir('${item.ID}')">🗑️ Excluir</button>
+            `;
+            dadosDiv.appendChild(div);
+          });
+        });
+    }
+
+    function excluir(id) {
+      if (confirm('Tem certeza que deseja excluir esse item?')) {
+        fetch(`${API_URL}/ID/${id}`, { method: 'DELETE' })
+          .then(() => {
+            alert('Item excluído!');
+            carregarDados();
+          });
+      }
+    }
+
+    function editar(id) {
+      window.location.href = `editar.html?id=${id}`;
+    }
+
+    carregarDados();
+  </script>
+
+</body>
+</html>

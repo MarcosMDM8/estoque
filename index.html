@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#0070f2" />
+  <title>Controle de Estoque</title>
+  
+  <!-- Manifesto para PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  
+  <!-- Meta tags para melhorar a experiência em dispositivos móveis -->
+  <meta name="description" content="Controle de estoque e inventário em tempo real.">
+  <meta name="robots" content="noindex, nofollow">
+
+  <style>
+    /* Estilos gerais */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 10px;
+      overflow-x: hidden;
+    }
+
+    /* Estilos do contêiner do formulário e lista */
+    .form-container, .buttons-container, #lista {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 15px auto;
+      max-width: 100%;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      width: 100%;
+    }
+
+    /* Estilos do formulário */
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    input, select {
+      flex: 1 1 45%;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      flex: 1 1 100%;
+      padding: 12px;
+      background-color: #0070f2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005ad3;
+    }
+
+    .btn-secondary {
+      background-color: #4CAF50; /* Verde */
+    }
+
+    .btn-secondary:hover {
+      background-color: #45a049;
+    }
+
+    /* Estilo da lista de itens */
+    .entrada {
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+
+    .entrada:last-child {
+      border-bottom: none;
+    }
+
+    .entrada button {
+      margin-top: 6px;
+      margin-right: 5px;
+      font-size: 0.9rem;
+      padding: 6px 10px;
+    }
+
+    /* Responsividade para telas pequenas */
+    @media (max-width: 600px) {
+      form {
+        flex-direction: column;
+      }
+
+      input, select {
+        flex: 1 1 100%;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Controle de Estoque</h1>
+
+  <div class="form-container">
+    <form id="form">
+      <input type="text" name="ID" id="ID" placeholder="ID" required />
+      <input type="text" name="produto" id="produto" placeholder="Produto" required />
+      <input type="text" name="tipo" id="tipo" placeholder="Tipo" required />
+      <input type="number" name="quantidade" id="quantidade" placeholder="Quantidade" required />
+      <input type="text" name="endereco" id="endereco" placeholder="Endereço" required />
+      <input type="date" name="data" id="data" required />
+      <button type="submit">Salvar</button>
+    </form>
+    <p id="resposta"></p>
+  </div>
+
+  <div class="buttons-container">
+    <button class="btn-secondary" onclick="window.location.href='pagina2.html'">Ir para Consulta e Edição</button>
+  </div>
+
+  <div id="lista">
+    <h2>Lista de Itens</h2>
+    <div id="dados"></div>
+  </div>
+
+  <script>
+    const API_URL = 'https://api.sheetbest.com/sheets/84e6a4c0-a620-45c6-97a4-36695d0970ea';
+    let editando = false;
+    let idAtual = '';
+
+    const form = document.getElementById('form');
+    const resposta = document.getElementById('resposta');
+    const dadosDiv = document.getElementById('dados');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const dados = {
+        ID: form.ID.value,
+        produto: form.produto.value,
+        tipo: form.tipo.value,
+        quantidade: form.quantidade.value,
+        endereco: form.endereco.value,
+        data: form.data.value
+      };
+
+      const metodo = editando ? 'PUT' : 'POST';
+      const url = editando ? `${API_URL}/ID/${idAtual}` : API_URL;
+
+      fetch(url, {
+        method: metodo,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      })
+      .then(() => {
+        resposta.textContent = editando ? '✏️ Atualizado com sucesso!' : '✅ Cadastrado com sucesso!';
+        resposta.style.color = editando ? 'blue' : 'green';
+        form.reset();
+        editando = false;
+        carregarDados();
+      })
+      .catch(() => {
+        resposta.textContent = '❌ Erro na operação!';
+        resposta.style.color = 'red';
+      });
+    });
+
+    function carregarDados() {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          dadosDiv.innerHTML = '';
+          data.reverse().forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'entrada';
+            div.innerHTML = `
+              <strong>${item.produto}</strong> - ${item.tipo} - ${item.quantidade} unidades - ${item.endereco} - ${item.data} (ID: ${item.ID})
+            `;
+            dadosDiv.appendChild(div);
+          });
+        });
+    }
+
+    carregarDados();
+  </script>
+
+</body>
+</html>
